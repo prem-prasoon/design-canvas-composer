@@ -1,6 +1,16 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
+import { MenuItemDialog } from "./MenuItemDialog";
+
+export interface Modifier {
+  id: string;
+  name: string;
+  price: number;
+  required?: boolean;
+  options?: string[];
+}
 
 export interface MenuItemData {
   id: string;
@@ -8,15 +18,33 @@ export interface MenuItemData {
   price: number;
   image: string;
   category: string;
+  modifiers?: Modifier[];
 }
 
 interface MenuItemProps {
   item: MenuItemData;
-  onAddToCart: (item: MenuItemData) => void;
+  onAddToCart: (item: MenuItemData, modifiers?: any[], specialRequest?: string, quantity?: number) => void;
 }
 
 export const MenuItem = ({ item, onAddToCart }: MenuItemProps) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleAddClick = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleAddToCart = (item: MenuItemData, modifiers: any[] = [], specialRequest: string = "", quantity: number = 1) => {
+    onAddToCart(item, modifiers, specialRequest, quantity);
+  };
+
   return (
+    <>
+      <MenuItemDialog
+        item={item}
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onAddToCart={handleAddToCart}
+      />
     <Card className="group cursor-pointer transition-all duration-300 hover:shadow-custom-lg hover:-translate-y-1 bg-card border-border overflow-hidden relative">
       <div className="aspect-square overflow-hidden relative">
         <img
@@ -28,7 +56,7 @@ export const MenuItem = ({ item, onAddToCart }: MenuItemProps) => {
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
           <Button
             size="lg"
-            onClick={() => onAddToCart(item)}
+            onClick={handleAddClick}
             className="bg-primary hover:bg-primary-hover text-primary-foreground shadow-custom-lg transition-all duration-200 hover:scale-110 rounded-full p-4"
           >
             <Plus className="h-8 w-8" />
@@ -48,5 +76,6 @@ export const MenuItem = ({ item, onAddToCart }: MenuItemProps) => {
         </div>
       </CardContent>
     </Card>
+    </>
   );
 };

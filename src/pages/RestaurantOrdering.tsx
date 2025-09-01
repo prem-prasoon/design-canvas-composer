@@ -28,42 +28,136 @@ const menuItems: MenuItemData[] = [
     name: "Chicken Parmigiana",
     price: 12.00,
     image: chickenImage,
-    category: "Hot subs"
+    category: "Hot subs",
+    modifiers: [
+      {
+        id: "size",
+        name: "Size",
+        price: 0,
+        required: true,
+        options: ["Regular", "Large (+$2)", "Extra Large (+$4)"]
+      },
+      {
+        id: "cheese",
+        name: "Extra Cheese",
+        price: 1.50
+      },
+      {
+        id: "sauce",
+        name: "Extra Sauce",
+        price: 0.75
+      }
+    ]
   },
   {
     id: "2", 
     name: "Meatball Parmigiana",
     price: 12.00,
     image: meatballImage,
-    category: "Hot subs"
+    category: "Hot subs",
+    modifiers: [
+      {
+        id: "size",
+        name: "Size",
+        price: 0,
+        required: true,
+        options: ["Regular", "Large (+$2)", "Extra Large (+$4)"]
+      },
+      {
+        id: "cheese",
+        name: "Extra Cheese",
+        price: 1.50
+      },
+      {
+        id: "extra-meatballs",
+        name: "Extra Meatballs",
+        price: 2.00
+      }
+    ]
   },
   {
     id: "3",
     name: "Veal Parmigiana", 
     price: 13.00,
     image: vealImage,
-    category: "Hot subs"
+    category: "Hot subs",
+    modifiers: [
+      {
+        id: "size",
+        name: "Size",
+        price: 0,
+        required: true,
+        options: ["Regular", "Large (+$2)", "Extra Large (+$4)"]
+      },
+      {
+        id: "cheese",
+        name: "Extra Cheese",
+        price: 1.50
+      }
+    ]
   },
   {
     id: "4",
     name: "Sausage Parmigiana",
     price: 12.00,
     image: sausageImage,
-    category: "Hot subs"
+    category: "Hot subs",
+    modifiers: [
+      {
+        id: "size",
+        name: "Size",
+        price: 0,
+        required: true,
+        options: ["Regular", "Large (+$2)", "Extra Large (+$4)"]
+      },
+      {
+        id: "peppers",
+        name: "Add Peppers",
+        price: 1.00
+      }
+    ]
   },
   {
     id: "5",
     name: "Eggplant Parmigiana",
     price: 12.00,
     image: eggplantImage,
-    category: "Hot subs"
+    category: "Hot subs",
+    modifiers: [
+      {
+        id: "size",
+        name: "Size",
+        price: 0,
+        required: true,
+        options: ["Regular", "Large (+$2)", "Extra Large (+$4)"]
+      },
+      {
+        id: "cheese",
+        name: "Extra Cheese",
+        price: 1.50
+      }
+    ]
   },
   {
     id: "6",
     name: "Shrimp Parmigiana",
     price: 12.00,
     image: shrimpImage,
-    category: "Seafood"
+    category: "Seafood",
+    modifiers: [
+      {
+        id: "size",
+        name: "Size",
+        price: 0,
+        required: true,
+        options: ["Regular", "Large (+$2)", "Extra Large (+$4)"]
+      },
+      {
+        id: "extra-shrimp",
+        name: "Extra Shrimp",
+        price: 3.00
+      }
+    ]
   }
 ];
 
@@ -74,18 +168,16 @@ export const RestaurantOrdering = () => {
 
   const filteredItems = menuItems.filter(item => item.category === activeCategory);
 
-  const addToCart = (item: MenuItemData) => {
-    const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
+  const addToCart = (item: MenuItemData, modifiers: any[] = [], specialRequest: string = "", quantity: number = 1) => {
+    const cartItem = { 
+      ...item, 
+      quantity,
+      modifiers,
+      specialRequest,
+      id: `${item.id}-${Date.now()}` // Unique ID for customized items
+    };
     
-    if (existingItem) {
-      setCartItems(cartItems.map(cartItem =>
-        cartItem.id === item.id
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      ));
-    } else {
-      setCartItems([...cartItems, { ...item, quantity: 1 }]);
-    }
+    setCartItems([...cartItems, cartItem]);
 
     toast({
       title: "Added to cart",
