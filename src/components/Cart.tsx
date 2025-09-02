@@ -1,8 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Minus, Plus, Trash2, Printer, CreditCard } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Minus, Plus, Trash2, Printer, CreditCard, Users } from "lucide-react";
 import { MenuItemData } from "./MenuItem";
+import { Guest } from "./GuestSelector";
+import { useState } from "react";
 
 export interface CartItem extends MenuItemData {
   quantity: number;
@@ -12,10 +18,26 @@ interface CartProps {
   items: CartItem[];
   onUpdateQuantity: (id: string, quantity: number) => void;
   onRemoveItem: (id: string) => void;
-  guestName?: string;
+  guests: Guest[];
+  activeGuestId: string;
+  onGuestChange: (guestId: string) => void;
+  onAddGuest: (guestName: string) => void;
 }
 
-export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guestName }: CartProps) => {
+export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guests, activeGuestId, onGuestChange, onAddGuest }: CartProps) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newGuestName, setNewGuestName] = useState("");
+
+  const handleAddGuest = () => {
+    if (newGuestName.trim()) {
+      onAddGuest(newGuestName.trim());
+      setNewGuestName("");
+      setIsDialogOpen(false);
+    }
+  };
+
+  const activeGuest = guests.find(g => g.id === activeGuestId);
+  
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
   const tax1 = subtotal * 0.08; // 8% tax
   const tax2 = subtotal * 0.02; // 2% additional tax
@@ -26,8 +48,63 @@ export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guestName }: CartP
     <div className="w-80 bg-cart-bg border-l border-border h-full flex flex-col">
       <CardHeader className="pb-4">
         <CardTitle className="text-xl font-bold text-success-green">
-          {guestName ? `${guestName}'s Order` : 'Order Summary'}
+          {activeGuest ? `${activeGuest.name}'s Order` : 'Order Summary'}
         </CardTitle>
+        
+        {/* Guest Selection */}
+        <div className="mt-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Users className="h-4 w-4" />
+            Ordering for:
+          </div>
+          <div className="flex gap-2">
+            <Select value={activeGuestId} onValueChange={onGuestChange}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Select guest" />
+              </SelectTrigger>
+              <SelectContent>
+                {guests.map((guest) => (
+                  <SelectItem key={guest.id} value={guest.id}>
+                    {guest.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add New Guest</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="guest-name">Guest Name</Label>
+                    <Input
+                      id="guest-name"
+                      value={newGuestName}
+                      onChange={(e) => setNewGuestName(e.target.value)}
+                      placeholder="Enter guest name"
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddGuest()}
+                    />
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleAddGuest} disabled={!newGuestName.trim()}>
+                      Add Guest
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col">

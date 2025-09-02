@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { MenuItem, MenuItemData } from "@/components/MenuItem";
 import { Cart, CartItem } from "@/components/Cart";
-import { GuestSelector, Guest } from "@/components/GuestSelector";
+import { Guest } from "@/components/GuestSelector";
 import { useToast } from "@/hooks/use-toast";
 
 // Import images
@@ -251,13 +251,6 @@ export const RestaurantOrdering = () => {
         />
         
         <div className="flex-1 p-6 overflow-y-auto">
-          <GuestSelector
-            guests={guests}
-            activeGuestId={activeGuestId}
-            onGuestChange={setActiveGuestId}
-            onAddGuest={addGuest}
-          />
-          
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {filteredItems.map((item) => (
               <MenuItem
@@ -275,7 +268,10 @@ export const RestaurantOrdering = () => {
         items={currentGuestCart}
         onUpdateQuantity={updateQuantity}
         onRemoveItem={removeItem}
-        guestName={activeGuest?.name}
+        guests={guests}
+        activeGuestId={activeGuestId}
+        onGuestChange={setActiveGuestId}
+        onAddGuest={addGuest}
       />
     </div>
   );
