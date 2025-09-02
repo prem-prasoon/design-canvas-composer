@@ -12,9 +12,10 @@ interface CartProps {
   items: CartItem[];
   onUpdateQuantity: (id: string, quantity: number) => void;
   onRemoveItem: (id: string) => void;
+  guestName?: string;
 }
 
-export const Cart = ({ items, onUpdateQuantity, onRemoveItem }: CartProps) => {
+export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guestName }: CartProps) => {
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
   const tax1 = subtotal * 0.08; // 8% tax
   const tax2 = subtotal * 0.02; // 2% additional tax
@@ -24,7 +25,9 @@ export const Cart = ({ items, onUpdateQuantity, onRemoveItem }: CartProps) => {
   return (
     <div className="w-80 bg-cart-bg border-l border-border h-full flex flex-col">
       <CardHeader className="pb-4">
-        <CardTitle className="text-xl font-bold text-success-green">Order Summary</CardTitle>
+        <CardTitle className="text-xl font-bold text-success-green">
+          {guestName ? `${guestName}'s Order` : 'Order Summary'}
+        </CardTitle>
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col">

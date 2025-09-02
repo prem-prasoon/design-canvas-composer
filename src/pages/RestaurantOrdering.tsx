@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { MenuItem, MenuItemData } from "@/components/MenuItem";
 import { Cart, CartItem } from "@/components/Cart";
+import { GuestSelector, Guest } from "@/components/GuestSelector";
 import { useToast } from "@/hooks/use-toast";
 
 // Import images
@@ -163,10 +164,33 @@ const menuItems: MenuItemData[] = [
 
 export const RestaurantOrdering = () => {
   const [activeCategory, setActiveCategory] = useState("Hot subs");
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [guests, setGuests] = useState<Guest[]>([
+    { id: "guest-1", name: "Guest 1" }
+  ]);
+  const [activeGuestId, setActiveGuestId] = useState("guest-1");
+  const [guestCarts, setGuestCarts] = useState<Record<string, CartItem[]>>({
+    "guest-1": []
+  });
   const { toast } = useToast();
 
   const filteredItems = menuItems.filter(item => item.category === activeCategory);
+  const currentGuestCart = guestCarts[activeGuestId] || [];
+  const activeGuest = guests.find(g => g.id === activeGuestId);
+
+  const addGuest = (guestName: string) => {
+    const newGuestId = `guest-${Date.now()}`;
+    const newGuest = { id: newGuestId, name: guestName };
+    
+    setGuests([...guests, newGuest]);
+    setGuestCarts({ ...guestCarts, [newGuestId]: [] });
+    setActiveGuestId(newGuestId);
+    
+    toast({
+      title: "Guest added",
+      description: `${guestName} has been added to the booking`,
+      duration: 2000,
+    });
+  };
 
   const addToCart = (item: MenuItemData, modifiers: any[] = [], specialRequest: string = "", quantity: number = 1) => {
     const cartItem = { 
@@ -177,11 +201,14 @@ export const RestaurantOrdering = () => {
       id: `${item.id}-${Date.now()}` // Unique ID for customized items
     };
     
-    setCartItems([...cartItems, cartItem]);
+    setGuestCarts({
+      ...guestCarts,
+      [activeGuestId]: [...currentGuestCart, cartItem]
+    });
 
     toast({
       title: "Added to cart",
-      description: `${item.name} has been added to your order`,
+      description: `${item.name} has been added to ${activeGuest?.name}'s order`,
       duration: 2000,
     });
   };
@@ -192,16 +219,23 @@ export const RestaurantOrdering = () => {
       return;
     }
     
-    setCartItems(cartItems.map(item =>
-      item.id === id ? { ...item, quantity } : item
-    ));
+    setGuestCarts({
+      ...guestCarts,
+      [activeGuestId]: currentGuestCart.map(item =>
+        item.id === id ? { ...item, quantity } : item
+      )
+    });
   };
 
   const removeItem = (id: string) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+    setGuestCarts({
+      ...guestCarts,
+      [activeGuestId]: currentGuestCart.filter(item => item.id !== id)
+    });
+    
     toast({
       title: "Removed from cart",
-      description: "Item has been removed from your order",
+      description: "Item has been removed from the order",
       duration: 2000,
     });
   };
@@ -217,6 +251,13 @@ export const RestaurantOrdering = () => {
         />
         
         <div className="flex-1 p-6 overflow-y-auto">
+          <GuestSelector
+            guests={guests}
+            activeGuestId={activeGuestId}
+            onGuestChange={setActiveGuestId}
+            onAddGuest={addGuest}
+          />
+          
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {filteredItems.map((item) => (
               <MenuItem
@@ -231,9 +272,10 @@ export const RestaurantOrdering = () => {
 
       {/* Cart Sidebar */}
       <Cart
-        items={cartItems}
+        items={currentGuestCart}
         onUpdateQuantity={updateQuantity}
         onRemoveItem={removeItem}
+        guestName={activeGuest?.name}
       />
     </div>
   );
