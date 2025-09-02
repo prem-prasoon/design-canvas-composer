@@ -12,6 +12,8 @@ import { useState } from "react";
 
 export interface CartItem extends MenuItemData {
   quantity: number;
+  modifiers?: any[];
+  specialRequest?: string;
 }
 
 interface CartProps {
@@ -38,7 +40,10 @@ export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guests, activeGues
 
   const activeGuest = guests.find(g => g.id === activeGuestId);
   
-  const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+  const subtotal = items.reduce((total, item) => {
+    const modifiersPrice = item.modifiers?.reduce((sum, mod) => sum + (mod.price || 0), 0) || 0;
+    return total + (item.price + modifiersPrice) * item.quantity;
+  }, 0);
   const tax1 = subtotal * 0.08; // 8% tax
   const tax2 = subtotal * 0.02; // 2% additional tax
   const serviceFee = 2.46;
@@ -115,11 +120,11 @@ export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guests, activeGues
             items.map((item) => (
               <Card key={item.id} className="bg-background shadow-custom-sm">
                 <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start gap-3">
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-12 h-12 object-cover rounded-md"
+                      className="w-12 h-12 object-cover rounded-md flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-sm truncate text-card-foreground">
@@ -128,6 +133,32 @@ export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guests, activeGues
                       <p className="text-price-text font-semibold">
                         ${item.price.toFixed(2)} x {item.quantity}
                       </p>
+                      
+                      {/* Modifiers */}
+                      {item.modifiers && item.modifiers.length > 0 && (
+                        <div className="mt-1 space-y-1">
+                          {item.modifiers.map((modifier, index) => (
+                            <div key={index} className="flex items-center justify-between text-xs text-muted-foreground">
+                              <span>
+                                {modifier.name}
+                                {modifier.option && `: ${modifier.option}`}
+                              </span>
+                              {modifier.price > 0 && (
+                                <span>+${modifier.price.toFixed(2)}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Special Request */}
+                      {item.specialRequest && (
+                        <div className="mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-medium">Note:</span> {item.specialRequest}
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
