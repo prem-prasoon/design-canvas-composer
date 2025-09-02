@@ -45,7 +45,7 @@ export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guests, activeGues
   const grandTotal = subtotal + tax1 + tax2 + serviceFee;
 
   return (
-    <div className="w-80 bg-cart-bg border-l border-border h-full flex flex-col">
+    <div className="w-96 bg-cart-bg border-l border-border h-full flex flex-col">
       <CardHeader className="pb-4">
         <CardTitle className="text-xl font-bold text-success-green">
           {activeGuest ? `${activeGuest.name}'s Order` : 'Order Summary'}
@@ -129,7 +129,7 @@ export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guests, activeGues
                         ${item.price.toFixed(2)} x {item.quantity}
                       </p>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1">
                         <Button
                           variant="quantity"
@@ -138,9 +138,6 @@ export const Cart = ({ items, onUpdateQuantity, onRemoveItem, guests, activeGues
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="w-8 text-center text-sm font-medium">
-                          {item.quantity}
-                        </span>
                         <Button
                           variant="quantity"
                           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
